@@ -147,7 +147,7 @@ export default function Home() {
             </div>
           )
           :
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 gap-2 w-full">
             <div className="col-span-5 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
             <div className="col-span-4 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
             <div className="col-span-1 h-5 rounded-full bg-zinc-100 animate-pulse"></div>

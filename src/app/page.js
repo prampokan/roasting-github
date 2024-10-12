@@ -1,101 +1,150 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from "react";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [username, setUsername] = useState("")
+  const [roast, setRoast] = useState("")
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const Roast = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      setError(null)
+      setRoast("")
+
+      // Get Profile Github
+      const response = await fetch(`https://api.github.com/users/${username}`)
+
+      if (!response.ok) {
+        throw new Error("Pengguna tidak ditemukan")
+      }
+
+      const data = await response.json()
+      console.log(data)
+
+      // Get Repositories
+      const repoResponse = await fetch(`https://api.github.com/users/${username}/repos`)
+      const repoData = await repoResponse.json()
+
+      const repos = repoData.map(repo => `
+        Nama Repo: ${repo.name || 'Tidak ada nama repo'}
+        Pemilik: ${repo.owner.login || 'Tidak ada pemilik repo'}
+        Deskripsi: ${repo.description || 'Tidak ada deskripsi'}
+        Fork: ${repo.fork ? 'Ya' : 'Tidak'}
+        Jumlah Bintang: ${repo.stargazers_count || 0}
+        Jumlah Pengamat: ${repo.watchers_count || 0}
+        Visibilitas: ${repo.visibility || 'Tidak ada visibilitas'}
+        Bahasa: ${repo.language || 'Tidak ada bahasa'}
+        Jumlah Forks: ${repo.forks_count || 0}
+      `).join('\n\n')
+      console.log(repos)
+
+      // Get ReadMe
+      const readmeResponse = await fetch(`https://raw.githubusercontent.com/${username}/${username}/main/README.md`)
+      let readmeData = ""
+
+      if (readmeResponse.ok) {
+        readmeData = await readmeResponse.text()
+      } else {
+        readmeData = 'Tidak ada ReadMe (kayaknya dia malas buat ya!)'
+      }
+      console.log(readmeData)
+
+      // ROAST🔥
+      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+      const prompt = `Kamu adalah seorang developer yang lucu dan sarkastis, bertugas untuk "meledek" profil GitHub. Ledek profil GitHub berikut dengan cara yang lucu dan menyakitkan hati sedikit tidak apa apa:
+
+        Username: ${data.login}
+        Nama: ${data.name || 'Tidak disediakan'}
+        Bio: ${data.bio || 'Tidak ada bio (mungkin terlalu keren untuk dideskripsikan)'}
+        Personal Website: ${data.blog || 'Tidak ada Personal Website (kayaknya ga kreatif dia)'}
+        Repo Publik: ${data.public_repos}
+        Public Gists: ${data.public_gists}
+        Email: ${data.email}
+        Company: ${data.company}
+        Location: ${data.location}
+        Pengikut: ${data.followers}
+        Mengikuti: ${data.following}
+        Akun Dibuat: ${new Date(data.created_at).toLocaleDateString('id-ID')}
+        Readme: ${readmeData}
+        Repositories: ${repos}
+        
+        Buat lelucon tentang:
+        Jumlah repositori mereka (terlalu banyak? terlalu sedikit?)
+        Rasio pengikut dan yang diikuti
+        Berapa lama mereka sudah di GitHub
+        Bio mereka (atau ketiadaannya)
+        Isi konten Readme mereka
+        Repositories mereka
+        Detail menarik lainnya yang kamu perhatikan
+
+        Jangan ragu ragu untuk meledek.
+        
+        Pastikan seluruh responsmu dalam bahasa Indonesia yang santai dan gaul (Gunakan bahasa "gue" "lu").`
+
+      const result = await model.generateContent(prompt)
+      console.log(result.response.text())
+      setRoast(result.response.text())
+
+    } catch (error) {
+      console.error("Error:", error)
+      setError(error.message) 
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="w-full flex justify-center py-20 px-5 xl:px-0">
+      <div className="w-[50rem]">
+        <h1 className="text-2xl sm:text-4xl font-bold uppercase mb-5 text-center">Roasting Github mu🔥</h1>
+        <form onSubmit={(e) => Roast(e)} className="flex flex-col w-full gap-2 my-10">
+          <input 
+            type="text"
+            placeholder="Username Github"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="border px-4 py-2 rounded-lg outline-none"
+            required
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <button type="submit" disabled={loading} className="bg-zinc-800 text-white font-bold p-2 rounded-lg hover:opacity-70 disabled:opacity-70">{loading ? "Loading..." : "Roast"}</button>
+        </form>
+
+        {error && (
+          <div className="text-red-500 mt-2">
+            <p>{error}</p>
+          </div>
+        )}
+        
+        {!loading ? 
+          (
+            <div className="w-full text-justify">
+              <h1 className="font-medium text-zinc-800">
+                {roast.split(/\*\*(.*?)\*\*/g).map((part, i) =>
+                  i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                )}
+              </h1>
+            </div>
+          )
+          :
+          <div className="grid grid-cols-5 gap-2">
+            <div className="col-span-5 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-4 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-1 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-2 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-3 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-3 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-2 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+            <div className="col-span-4 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+          </div>
+        }
+      </div>
     </div>
   );
 }

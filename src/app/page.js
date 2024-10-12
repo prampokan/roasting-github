@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Image from "next/image";
 
 export default function Home() {
   const [username, setUsername] = useState("")
@@ -20,7 +21,7 @@ export default function Home() {
       const response = await fetch(`https://api.github.com/users/${username}`)
 
       if (!response.ok) {
-        throw new Error("Pengguna tidak ditemukan")
+        throw new Error("user github tidak ditemukan boss❌")
       }
 
       const data = await response.json()
@@ -102,25 +103,38 @@ export default function Home() {
 
   return (
     <div className="w-full flex justify-center py-20 px-5 xl:px-0">
-      <div className="w-[50rem]">
-        <h1 className="text-2xl sm:text-4xl font-bold uppercase mb-5 text-center">Roasting Github mu🔥</h1>
+      <div className="w-[50rem] flex flex-col items-center">
+        {/* <h1 className="text-2xl sm:text-4xl font-bold uppercase mb-5 text-center font-jacquard">Roasting Github mu🔥</h1> */}
+        <Image
+          src='/assets/hero.webp'
+          alt="Github Roasting"
+          width={400}
+          height={400}
+        />
         <form onSubmit={(e) => Roast(e)} className="flex flex-col w-full gap-2 my-10">
           <input 
             type="text"
             placeholder="Username Github"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="border px-4 py-2 rounded-lg outline-none"
+            className="border px-4 py-2 rounded-lg outline-1 outline-zinc-400 font-medium"
             required
-            />
-          <button type="submit" disabled={loading} className="bg-zinc-800 text-white font-bold p-2 rounded-lg hover:opacity-70 disabled:opacity-70">{loading ? "Loading..." : "Roast"}</button>
+          />
+          {error && (
+            <div className="text-red-500 font-medium">
+              <p>{error}</p>
+            </div>
+          )}
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="bg-zinc-800 text-white font-bold p-2 rounded-lg hover:opacity-80 disabled:opacity-80 transition-all"
+          >
+            {loading ? "loading bos..." : "Roast🔥"}
+          </button>
         </form>
 
-        {error && (
-          <div className="text-red-500 mt-2">
-            <p>{error}</p>
-          </div>
-        )}
+        
         
         {!loading ? 
           (

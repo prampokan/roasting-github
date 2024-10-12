@@ -25,7 +25,7 @@ export default function Home() {
       }
 
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
 
       // Get Repositories
       const repoResponse = await fetch(`https://api.github.com/users/${username}/repos`)
@@ -42,7 +42,7 @@ export default function Home() {
         Bahasa: ${repo.language || 'Tidak ada bahasa'}
         Jumlah Forks: ${repo.forks_count || 0}
       `).join('\n\n')
-      console.log(repos)
+      // console.log(repos)
 
       // Get ReadMe
       const readmeResponse = await fetch(`https://raw.githubusercontent.com/${username}/${username}/main/README.md`)
@@ -53,7 +53,7 @@ export default function Home() {
       } else {
         readmeData = 'Tidak ada ReadMe (kayaknya dia malas buat ya!)'
       }
-      console.log(readmeData)
+      // console.log(readmeData)
 
       // ROAST🔥
       const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
@@ -90,7 +90,7 @@ export default function Home() {
         Pastikan seluruh responsmu dalam bahasa Indonesia yang santai dan gaul (Gunakan bahasa "gue" "lu").`
 
       const result = await model.generateContent(prompt)
-      console.log(result.response.text())
+      // console.log(result.response.text())
       setRoast(result.response.text())
 
     } catch (error) {

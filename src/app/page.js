@@ -134,8 +134,6 @@ export default function Home() {
           </button>
         </form>
 
-        
-        
         {!loading ? 
           (
             <div className="w-full text-justify">

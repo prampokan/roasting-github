@@ -102,22 +102,23 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full flex justify-center py-20 px-5 xl:px-0">
-      <div className="w-[50rem] flex flex-col items-center">
-        {/* <h1 className="text-2xl sm:text-4xl font-bold uppercase mb-5 text-center font-jacquard">Roasting Github mu🔥</h1> */}
-        <Image
-          src='/assets/hero.webp'
-          alt="Github Roasting"
-          width={400}
-          height={400}
+    <div className="w-full min-h-screen flex justify-center py-20 px-5 xl:px-0 overflow-hidden">
+      <div className="w-[50rem] flex flex-col items-center relative">
+        <Image 
+          src='/assets/mesh.png'
+          alt="image"
+          width={1000}
+          height={1000}
+          className="absolute translate-x-[30rem] z-0"
         />
-        <form onSubmit={(e) => Roast(e)} className="flex flex-col w-full gap-2 my-10">
+        <h1 className="text-3xl sm:text-5xl font-bold mb-5 text-center font-jacquard text-slate-700 tracking-tighter z-10">🔥Roasting Github🔥</h1>
+        <form onSubmit={(e) => Roast(e)} className="flex flex-col w-full gap-2 my-10 z-10">
           <input 
             type="text"
             placeholder="Username Github"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="border px-4 py-2 rounded-lg outline-1 outline-zinc-400 font-medium"
+            className="border-2 border-sky-200 px-4 py-2 rounded outline-3 outline-sky-400 font-medium text-slate-700"
             required
           />
           {error && (
@@ -128,7 +129,7 @@ export default function Home() {
           <button 
             type="submit" 
             disabled={loading} 
-            className="bg-zinc-800 text-white font-bold p-2 rounded-lg hover:opacity-80 disabled:opacity-80 transition-all"
+            className="bg-slate-700 text-white font-bold p-2 rounded hover:opacity-80 disabled:opacity-80 transition-all"
           >
             {loading ? "loading bos..." : "Roast🔥"}
           </button>
@@ -136,8 +137,8 @@ export default function Home() {
 
         {!loading ? 
           (
-            <div className="w-full text-justify">
-              <h1 className="font-medium text-zinc-800">
+            <div className="w-full text-justify z-10">
+              <h1 className="font-medium text-slate-700 font-[family-name:var(--font-geist-mono)] leading-loose">
                 {roast.split(/\*\*(.*?)\*\*/g).map((part, i) =>
                   i % 2 === 1 ? <strong key={i}>{part}</strong> : part
                 )}
@@ -145,15 +146,15 @@ export default function Home() {
             </div>
           )
           :
-          <div className="grid grid-cols-5 gap-2 w-full">
-            <div className="col-span-5 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-4 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-1 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-2 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-3 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-3 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-2 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
-            <div className="col-span-4 h-5 rounded-full bg-zinc-100 animate-pulse"></div>
+          <div className="grid grid-cols-5 gap-3 w-full animate-pulse z-10">
+            <div className="col-span-5 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-4 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-1 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-2 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-3 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-3 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-2 h-5 rounded-full bg-sky-100"></div>
+            <div className="col-span-4 h-5 rounded-full bg-sky-100"></div>
           </div>
         }
       </div>
